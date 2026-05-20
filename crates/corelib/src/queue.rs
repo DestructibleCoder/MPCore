@@ -58,4 +58,10 @@ impl Queue {
             self.current - 1
         };
     }
+
+    pub fn set_current(&mut self, index: usize) {
+        if index < self.tracks.len() {
+            self.current = index;
+        }
+    }
 }

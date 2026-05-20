@@ -3,10 +3,12 @@ use std::path::Path;
 
 use anyhow::Result;
 
+use rodio::mixer::Mixer;
 use rodio::{Decoder, OutputStream, OutputStreamBuilder, Sink};
 
 pub struct RodioBackend {
     _stream: OutputStream,
+    mixer: Mixer,
     sink: Sink,
 }
 
@@ -14,18 +16,27 @@ impl RodioBackend {
     pub fn new() -> Result<Self> {
         let stream = OutputStreamBuilder::open_default_stream()?;
 
+        let mixer = stream.mixer().clone();
+
         let sink = Sink::connect_new(stream.mixer());
 
         Ok(Self {
             _stream: stream,
+            mixer,
             sink,
         })
     }
 
-    pub fn play_file(&self, path: &Path) -> Result<()> {
+    pub fn reset_sink(&mut self) {
+        self.sink.stop();
+
+        self.sink = Sink::connect_new(&self.mixer);
+    }
+
+    pub fn play_file(&mut self, path: &Path) -> Result<()> {
         let file = File::open(path)?;
 
-        let source = Decoder::new(file)?;
+        let source = Decoder::try_from(file)?;
 
         self.sink.append(source);
 
