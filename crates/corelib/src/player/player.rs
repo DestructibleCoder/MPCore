@@ -50,6 +50,10 @@ impl Player {
     pub fn play_track(&mut self, index: usize) -> Result<()> {
         self.backend.reset_sink();
 
+        if matches!(self.state(), PlaybackState::Paused) {
+            self.resume();
+        }
+
         self.queue.set_current(index);
 
         self.play_current()

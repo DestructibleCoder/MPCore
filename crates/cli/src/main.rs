@@ -1,5 +1,6 @@
 use anyhow::Result;
 use colored::*;
+use std::env;
 use std::io::{self, Write};
 use std::path::Path;
 
@@ -21,7 +22,13 @@ fn render_prompt(state: PlaybackState) -> String {
 }
 
 fn main() -> Result<()> {
-    let queue = Queue::load_from_folder(Path::new("./music"))?;
+    let args: Vec<String> = env::args().collect();
+
+    let queue = if args.len() == 2 {
+        Queue::load_from_folder(Path::new(&args[1]))?
+    } else {
+        Queue::load_from_folder(Path::new("./music"))?
+    };
 
     let mut player = Player::new(queue)?;
 
