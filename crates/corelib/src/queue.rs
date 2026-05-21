@@ -5,6 +5,9 @@ use anyhow::Result;
 use std::fs;
 use std::path::Path;
 
+use rodio::{Decoder, Source};
+use std::fs::File;
+
 pub struct Queue {
     pub tracks: Vec<Track>,
     pub current: usize,
@@ -32,7 +35,12 @@ impl Queue {
             let supported = matches!(extension.as_str(), "mp3" | "flac" | "wav" | "ogg");
 
             if supported {
-                tracks.push(Track { path });
+                let duration = File::open(&path)
+                    .ok()
+                    .and_then(|file| Decoder::try_from(file).ok())
+                    .and_then(|decoder| decoder.total_duration());
+
+                tracks.push(Track { path, duration });
             }
         }
 

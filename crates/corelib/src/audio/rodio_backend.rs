@@ -28,6 +28,10 @@ impl RodioBackend {
         })
     }
 
+    pub fn is_finished(&self) -> bool {
+        self.sink.empty()
+    }
+
     pub fn reset_sink(&mut self) {
         self.sink.stop();
 

@@ -12,10 +12,19 @@ pub enum PlaybackState {
     Stopped,
 }
 
+#[derive(Clone, Copy)]
+pub enum RepeatMode {
+    None,
+    Queue,
+    Track,
+}
+
 pub struct Player {
     queue: Queue,
     backend: RodioBackend,
     state: PlaybackState,
+
+    repeat_mode: RepeatMode,
 
     started_at: Option<Instant>,
     duration: Option<Duration>,
@@ -30,9 +39,43 @@ impl Player {
             backend,
             state: PlaybackState::Stopped,
 
+            repeat_mode: RepeatMode::None,
+
             started_at: None,
             duration: None,
         })
+    }
+
+    pub fn update(&mut self) -> Result<()> {
+        if matches!(self.state(), PlaybackState::Playing) && self.backend.is_finished() {
+            match self.repeat_mode() {
+                RepeatMode::None => {
+                    if self.queue.current + 1 < self.queue.tracks.len() {
+                        self.next_track()?;
+                    } else {
+                        self.state = PlaybackState::Stopped;
+                    }
+                }
+
+                RepeatMode::Queue => {
+                    self.next_track()?;
+                }
+
+                RepeatMode::Track => {
+                    self.play_current()?;
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    pub fn set_repeat_mode(&mut self, mode: RepeatMode) {
+        self.repeat_mode = mode;
+    }
+
+    pub fn repeat_mode(&self) -> RepeatMode {
+        self.repeat_mode
     }
 
     pub fn play_current(&mut self) -> Result<()> {
