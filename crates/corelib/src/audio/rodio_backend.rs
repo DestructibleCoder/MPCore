@@ -1,10 +1,11 @@
 use std::fs::File;
 use std::path::Path;
+use std::time::Duration;
 
 use anyhow::Result;
 
 use rodio::mixer::Mixer;
-use rodio::{Decoder, OutputStream, OutputStreamBuilder, Sink};
+use rodio::{Decoder, OutputStream, OutputStreamBuilder, Sink, Source};
 
 pub struct RodioBackend {
     _stream: OutputStream,
@@ -33,14 +34,16 @@ impl RodioBackend {
         self.sink = Sink::connect_new(&self.mixer);
     }
 
-    pub fn play_file(&mut self, path: &Path) -> Result<()> {
+    pub fn play_file(&mut self, path: &Path) -> Result<Option<Duration>> {
         let file = File::open(path)?;
 
         let source = Decoder::try_from(file)?;
 
+        let duration = source.total_duration();
+
         self.sink.append(source);
 
-        Ok(())
+        Ok(duration)
     }
 
     pub fn pause(&self) {

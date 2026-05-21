@@ -1,5 +1,7 @@
 use anyhow::Result;
 
+use std::time::{Duration, Instant};
+
 use crate::audio::RodioBackend;
 use crate::queue::Queue;
 
@@ -14,6 +16,9 @@ pub struct Player {
     queue: Queue,
     backend: RodioBackend,
     state: PlaybackState,
+
+    started_at: Option<Instant>,
+    duration: Option<Duration>,
 }
 
 impl Player {
@@ -24,6 +29,9 @@ impl Player {
             queue,
             backend,
             state: PlaybackState::Stopped,
+
+            started_at: None,
+            duration: None,
         })
     }
 
@@ -40,11 +48,23 @@ impl Player {
 
         let track = &self.queue.tracks[self.queue.current];
 
-        self.backend.play_file(&track.path)?;
+        let duration = self.backend.play_file(&track.path)?;
+
+        self.started_at = Some(Instant::now());
+
+        self.duration = duration;
 
         self.state = PlaybackState::Playing;
 
         Ok(())
+    }
+
+    pub fn progress(&self) -> Option<(Duration, Duration)> {
+        let started = self.started_at?;
+
+        let duration = self.duration?;
+
+        Some((started.elapsed(), duration))
     }
 
     pub fn play_track(&mut self, index: usize) -> Result<()> {

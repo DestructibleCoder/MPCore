@@ -3,6 +3,7 @@ use colored::*;
 use std::env;
 use std::io::{self, Write};
 use std::path::Path;
+use std::time::Duration;
 
 use corelib::player::{PlaybackState, Player};
 use corelib::queue::Queue;
@@ -21,6 +22,28 @@ fn render_prompt(state: PlaybackState) -> String {
     }
 }
 
+fn format_duration(duration: Duration) -> String {
+    let secs = duration.as_secs();
+
+    let minutes = secs / 60;
+
+    let seconds = secs % 60;
+
+    format!("{:02}:{:02}", minutes, seconds)
+}
+
+fn render_progress_bar(current: Duration, total: Duration) -> String {
+    let width = 20;
+
+    let progress = current.as_secs_f32() / total.as_secs_f32();
+
+    let filled = (progress * width as f32) as usize;
+
+    let empty = width - filled;
+
+    format!("[{}{}]", "█".repeat(filled), "░".repeat(empty))
+}
+
 fn main() -> Result<()> {
     let args: Vec<String> = env::args().collect();
 
@@ -33,15 +56,6 @@ fn main() -> Result<()> {
     let mut player = Player::new(queue)?;
 
     println!("Welcome to MPCore CLI");
-    println!("Commands:\n");
-    println!("====================");
-    println!("======= play =======");
-    println!("======= pause ======");
-    println!("======= stop =======");
-    println!("======= next =======");
-    println!("======= prev =======");
-    println!("======= quit =======");
-    println!("====================\n");
 
     loop {
         print!("{}", render_prompt(player.state()));
@@ -73,6 +87,22 @@ fn main() -> Result<()> {
                 }
             }
 
+            "help" => {
+                println!("Commands:\n");
+                println!("====================");
+                println!("======= play =======");
+                println!("======= pause ======");
+                println!("======= stop =======");
+                println!("======= next =======");
+                println!("======= prev =======");
+                println!("======= quit =======");
+                println!("======= name =======");
+                println!("======= list =======");
+                println!("====== status ======");
+                println!("=== play <index> ===");
+                println!("====================\n");
+            }
+
             "pause" => {
                 player.pause();
             }
@@ -87,6 +117,17 @@ fn main() -> Result<()> {
 
             "prev" => {
                 player.previous_track()?;
+            }
+
+            "status" => {
+                if let Some((current, total)) = player.progress() {
+                    println!(
+                        "{} {} / {}",
+                        render_progress_bar(current, total),
+                        format_duration(current),
+                        format_duration(total)
+                    );
+                }
             }
 
             "vol" => {
