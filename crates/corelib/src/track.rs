@@ -1,7 +1,9 @@
 use std::path::PathBuf;
 use std::time::Duration;
 
-#[derive(Debug, Clone)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Track {
     pub path: PathBuf,
     pub duration: Option<Duration>,

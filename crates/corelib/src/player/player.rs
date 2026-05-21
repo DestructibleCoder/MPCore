@@ -1,5 +1,6 @@
 use anyhow::Result;
 
+use std::path::Path;
 use std::time::{Duration, Instant};
 
 use crate::audio::RodioBackend;
@@ -46,6 +47,16 @@ impl Player {
         })
     }
 
+    pub fn save_playlist(&self, path: &Path) -> Result<()> {
+        self.queue.save_playlist(path)
+    }
+
+    pub fn load_playlist(&mut self, path: &Path) -> Result<()> {
+        self.queue = Queue::load_playlist(path)?;
+
+        Ok(())
+    }
+
     pub fn update(&mut self) -> Result<()> {
         if matches!(self.state(), PlaybackState::Playing) && self.backend.is_finished() {
             match self.repeat_mode() {
@@ -68,6 +79,14 @@ impl Player {
         }
 
         Ok(())
+    }
+
+    pub fn shuffle(&mut self) {
+        self.queue.shuffle();
+    }
+
+    pub fn unshuffle(&mut self) {
+        self.queue.unshuffle();
     }
 
     pub fn set_repeat_mode(&mut self, mode: RepeatMode) {
