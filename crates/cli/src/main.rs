@@ -24,16 +24,6 @@ fn render_prompt(state: PlaybackState) -> String {
     }
 }
 
-fn format_duration(duration: Duration) -> String {
-    let secs = duration.as_secs();
-
-    let minutes = secs / 60;
-
-    let seconds = secs % 60;
-
-    format!("{:02}:{:02}", minutes, seconds)
-}
-
 fn format_duration_optional(duration: Option<Duration>) -> String {
     match duration {
         Some(d) => {
@@ -48,18 +38,6 @@ fn format_duration_optional(duration: Option<Duration>) -> String {
 
         None => String::from("--:--"),
     }
-}
-
-fn render_progress_bar(current: Duration, total: Duration) -> String {
-    let width = 20;
-
-    let progress = (current.as_secs_f32() / total.as_secs_f32()).min(1.0);
-
-    let filled = (progress * width as f32) as usize;
-
-    let empty = width - filled;
-
-    format!("[{}{}]", "█".repeat(filled), "░".repeat(empty))
 }
 
 fn main() -> Result<()> {
@@ -136,6 +114,7 @@ fn main() -> Result<()> {
                 println!("==== load <file> ===");
                 println!("==== save <file> ===");
                 println!("=== repeat <mode> ==");
+                println!("== seek <seconds> ==");
                 println!("====================\n");
             }
 
@@ -225,17 +204,6 @@ fn main() -> Result<()> {
                 player.lock().unwrap().previous_track()?;
             }
 
-            "status" => {
-                if let Some((current, total)) = player.lock().unwrap().progress() {
-                    println!(
-                        "{} {} / {}",
-                        render_progress_bar(current, total),
-                        format_duration(current),
-                        format_duration(total)
-                    );
-                }
-            }
-
             "vol" => {
                 if parts.len() < 2 {
                     println!("Usage: vol <number>");
@@ -255,14 +223,36 @@ fn main() -> Result<()> {
                 println!("volume set to {}", volume);
             }
 
+            "seek" => {
+                if parts.len() != 2 {
+                    println!("seek <seconds>");
+                    continue;
+                }
+
+                let Ok(seconds) = parts[1].parse::<u64>() else {
+                    println!("Invalid number");
+                    continue;
+                };
+
+                player.lock().unwrap().seek(seconds)?;
+            }
+
             "list" => {
                 for (i, track) in player.lock().unwrap().queue().tracks.iter().enumerate() {
-                    let name = track
-                        .path
-                        .file_name()
-                        .unwrap_or_default()
-                        .to_string_lossy()
-                        .to_string();
+                    let name = if let Some(title) = &track.metadata.title {
+                        if let Some(artist) = &track.metadata.artist {
+                            format!("{} - {}", artist, title)
+                        } else {
+                            title.clone()
+                        }
+                    } else {
+                        track
+                            .path
+                            .file_name()
+                            .unwrap_or_default()
+                            .to_string_lossy()
+                            .to_string()
+                    };
 
                     println!(
                         "{:>2}. {:<80} {}",
@@ -273,8 +263,8 @@ fn main() -> Result<()> {
                 }
             }
 
-            "name" => match player.lock().unwrap().current_track_name() {
-                Some(name) => println!("{}", name),
+            "name" => match player.lock().unwrap().get_track_info() {
+                Some(track_info) => println!("{}", track_info),
                 None => println!("No tracks selected"),
             },
 

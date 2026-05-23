@@ -1,7 +1,7 @@
 use anyhow::Result;
 
 use std::path::Path;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use crate::audio::RodioBackend;
 use crate::queue::Queue;
@@ -26,9 +26,6 @@ pub struct Player {
     state: PlaybackState,
 
     repeat_mode: RepeatMode,
-
-    started_at: Option<Instant>,
-    duration: Option<Duration>,
 }
 
 impl Player {
@@ -41,10 +38,13 @@ impl Player {
             state: PlaybackState::Stopped,
 
             repeat_mode: RepeatMode::None,
-
-            started_at: None,
-            duration: None,
         })
+    }
+
+    pub fn seek(&mut self, seconds: u64) -> Result<()> {
+        self.backend.seek(Duration::from_secs(seconds))?;
+
+        Ok(())
     }
 
     pub fn save_playlist(&self, path: &Path) -> Result<()> {
@@ -110,23 +110,11 @@ impl Player {
 
         let track = &self.queue.tracks[self.queue.current];
 
-        let duration = self.backend.play_file(&track.path)?;
-
-        self.started_at = Some(Instant::now());
-
-        self.duration = duration;
+        self.backend.play_file(&track.path)?;
 
         self.state = PlaybackState::Playing;
 
         Ok(())
-    }
-
-    pub fn progress(&self) -> Option<(Duration, Duration)> {
-        let started = self.started_at?;
-
-        let duration = self.duration?;
-
-        Some((started.elapsed(), duration))
     }
 
     pub fn play_track(&mut self, index: usize) -> Result<()> {
@@ -142,11 +130,41 @@ impl Player {
     }
 
     pub fn current_track_name(&self) -> Option<String> {
-        self.queue
-            .tracks
-            .get(self.queue.current)
-            .and_then(|t| t.path.file_name())
+        let track = self.queue.tracks.get(self.queue.current)?;
+
+        if let Some(title) = &track.metadata.title {
+            if let Some(artist) = &track.metadata.artist {
+                return Some(format!("{} - {}", artist, title));
+            }
+
+            return Some(title.clone());
+        }
+
+        track
+            .path
+            .file_name()
             .map(|n| n.to_string_lossy().to_string())
+    }
+
+    pub fn get_track_info(&self) -> Option<String> {
+        let track = self.queue.tracks.get(self.queue.current)?;
+
+        if let Some(title) = &track.metadata.title {
+            if let Some(artist) = &track.metadata.artist {
+                if let Some(album) = &track.metadata.album {
+                    return Some(format!("{} - {} | {}", artist, title, album));
+                }
+
+                return Some(format!("{} - {} | Unknown Album", artist, title));
+            }
+
+            return Some(title.clone());
+        }
+
+        return track
+            .path
+            .file_name()
+            .map(|n| n.to_string_lossy().to_string());
     }
 
     pub fn next_track(&mut self) -> Result<()> {

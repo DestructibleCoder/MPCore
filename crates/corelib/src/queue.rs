@@ -1,4 +1,5 @@
 use crate::track::Track;
+use crate::track::read_metadata;
 
 use anyhow::Result;
 
@@ -46,7 +47,13 @@ impl Queue {
                     .and_then(|file| Decoder::try_from(file).ok())
                     .and_then(|decoder| decoder.total_duration());
 
-                tracks.push(Track { path, duration });
+                let metadata = read_metadata(&path);
+
+                tracks.push(Track {
+                    path,
+                    duration,
+                    metadata,
+                });
             }
         }
 
