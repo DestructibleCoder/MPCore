@@ -1,0 +1,13 @@
+autoplay next track   +
+shuffle               +
+repeat mode           +
+status command        +
+seek                  +
+getting metadata      +
+making playlists      +
+
+
+### Next Release ###
+better playlists                  *
+add global storage for playlists  *
+open MPCore using playlist        *
