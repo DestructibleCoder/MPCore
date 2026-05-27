@@ -3,9 +3,11 @@ use colored::*;
 use std::env;
 use std::io::{self, Write};
 use std::path::Path;
+use std::sync::{Arc, Mutex};
+use std::thread;
 use std::time::Duration;
 
-use corelib::player::{PlaybackState, Player};
+use corelib::player::{PlaybackState, Player, RepeatMode};
 use corelib::queue::Queue;
 
 fn render_prompt(state: PlaybackState) -> String {
@@ -22,26 +24,20 @@ fn render_prompt(state: PlaybackState) -> String {
     }
 }
 
-fn format_duration(duration: Duration) -> String {
-    let secs = duration.as_secs();
+fn format_duration_optional(duration: Option<Duration>) -> String {
+    match duration {
+        Some(d) => {
+            let secs = d.as_secs();
 
-    let minutes = secs / 60;
+            let minutes = secs / 60;
 
-    let seconds = secs % 60;
+            let seconds = secs % 60;
 
-    format!("{:02}:{:02}", minutes, seconds)
-}
+            format!("{:02}:{:02}", minutes, seconds)
+        }
 
-fn render_progress_bar(current: Duration, total: Duration) -> String {
-    let width = 20;
-
-    let progress = current.as_secs_f32() / total.as_secs_f32();
-
-    let filled = (progress * width as f32) as usize;
-
-    let empty = width - filled;
-
-    format!("[{}{}]", "█".repeat(filled), "░".repeat(empty))
+        None => String::from("--:--"),
+    }
 }
 
 fn main() -> Result<()> {
@@ -53,12 +49,26 @@ fn main() -> Result<()> {
         Queue::load_from_folder(Path::new("./music"))?
     };
 
-    let mut player = Player::new(queue)?;
+    let player = Arc::new(Mutex::new(Player::new(queue)?));
+
+    let autoplay_player = Arc::clone(&player);
+
+    thread::spawn(move || {
+        loop {
+            {
+                let mut player = autoplay_player.lock().unwrap();
+
+                player.update().unwrap();
+            }
+
+            thread::sleep(Duration::from_millis(500));
+        }
+    });
 
     println!("Welcome to MPCore CLI");
 
     loop {
-        print!("{}", render_prompt(player.state()));
+        print!("{}", render_prompt(player.lock().unwrap().state()));
         io::stdout().flush()?;
 
         let mut input = String::new();
@@ -76,14 +86,14 @@ fn main() -> Result<()> {
                 if parts.len() == 2 {
                     match parts[1].parse::<usize>() {
                         Ok(index) => {
-                            player.play_track(index)?;
+                            player.lock().unwrap().play_track(index)?;
                         }
                         Err(_) => {
                             println!("Index out of range");
                         }
                     }
                 } else {
-                    player.play_current()?;
+                    player.lock().unwrap().play_current()?;
                 }
             }
 
@@ -100,34 +110,98 @@ fn main() -> Result<()> {
                 println!("======= list =======");
                 println!("====== status ======");
                 println!("=== play <index> ===");
+                println!("= shuffle <on|off> =");
+                println!("==== load <file> ===");
+                println!("==== save <file> ===");
+                println!("=== repeat <mode> ==");
+                println!("== seek <seconds> ==");
                 println!("====================\n");
             }
 
+            "save" => {
+                if parts.len() != 2 {
+                    println!("save <file>");
+                    continue;
+                }
+
+                player.lock().unwrap().save_playlist(Path::new(parts[1]))?;
+
+                println!("Playlist saved in {}!", parts[1]);
+            }
+
+            "load" => {
+                if parts.len() != 2 {
+                    println!("load <file>");
+                    continue;
+                }
+
+                player.lock().unwrap().load_playlist(Path::new(parts[1]))?;
+
+                println!("Playlist {} loaded!", parts[1]);
+            }
+
+            "repeat" => {
+                if parts.len() != 2 {
+                    println!("repeat <none|queue|track>");
+                    continue;
+                }
+
+                match parts[1] {
+                    "none" => {
+                        player.lock().unwrap().set_repeat_mode(RepeatMode::None);
+                    }
+
+                    "queue" => {
+                        player.lock().unwrap().set_repeat_mode(RepeatMode::Queue);
+                    }
+
+                    "track" => {
+                        player.lock().unwrap().set_repeat_mode(RepeatMode::Track);
+                    }
+
+                    _ => {
+                        println!("Unknown repeat mode!");
+                    }
+                }
+            }
+
+            "shuffle" => {
+                if parts.len() != 2 {
+                    println!("shuffle <on|off>");
+                    continue;
+                }
+
+                match parts[1] {
+                    "on" => {
+                        player.lock().unwrap().shuffle();
+                        println!("shuffle enabled");
+                    }
+
+                    "off" => {
+                        player.lock().unwrap().unshuffle();
+                        println!("shuffle disabled");
+                    }
+
+                    _ => {
+                        println!("Unknown shuffle mode!");
+                    }
+                }
+            }
+
             "pause" => {
-                player.pause();
+                player.lock().unwrap().pause();
             }
 
             "stop" => {
-                player.stop();
+                player.lock().unwrap().stop();
             }
 
             "next" => {
-                player.next_track()?;
+                player.lock().unwrap().next_track()?;
             }
 
             "prev" => {
-                player.previous_track()?;
-            }
-
-            "status" => {
-                if let Some((current, total)) = player.progress() {
-                    println!(
-                        "{} {} / {}",
-                        render_progress_bar(current, total),
-                        format_duration(current),
-                        format_duration(total)
-                    );
-                }
+                player.lock().unwrap().previous_track()?;
             }
 
             "vol" => {
@@ -144,26 +218,53 @@ fn main() -> Result<()> {
                     }
                 };
 
-                player.set_volume(volume);
+                player.lock().unwrap().set_volume(volume);
 
                 println!("volume set to {}", volume);
             }
 
-            "list" => {
-                for (i, track) in player.queue().tracks.iter().enumerate() {
-                    let name = track
-                        .path
-                        .file_name()
-                        .unwrap_or_default()
-                        .to_string_lossy()
-                        .to_string();
+            "seek" => {
+                if parts.len() != 2 {
+                    println!("seek <seconds>");
+                    continue;
+                }
 
-                    println!("{:>2}. {}", i, name);
+                let Ok(seconds) = parts[1].parse::<u64>() else {
+                    println!("Invalid number");
+                    continue;
+                };
+
+                player.lock().unwrap().seek(seconds)?;
+            }
+
+            "list" => {
+                for (i, track) in player.lock().unwrap().queue().tracks.iter().enumerate() {
+                    let name = if let Some(title) = &track.metadata.title {
+                        if let Some(artist) = &track.metadata.artist {
+                            format!("{} - {}", artist, title)
+                        } else {
+                            title.clone()
+                        }
+                    } else {
+                        track
+                            .path
+                            .file_name()
+                            .unwrap_or_default()
+                            .to_string_lossy()
+                            .to_string()
+                    };
+
+                    println!(
+                        "{:>2}. {:<80} {}",
+                        i,
+                        name,
+                        format_duration_optional(track.duration)
+                    );
                 }
             }
 
-            "name" => match player.current_track_name() {
-                Some(name) => println!("{}", name),
+            "name" => match player.lock().unwrap().get_track_info() {
+                Some(track_info) => println!("{}", track_info),
                 None => println!("No tracks selected"),
             },
 

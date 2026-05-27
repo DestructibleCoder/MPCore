@@ -28,6 +28,18 @@ impl RodioBackend {
         })
     }
 
+    pub fn seek(&self, position: Duration) -> Result<()> {
+        self.sink
+            .try_seek(position)
+            .map_err(|e| anyhow::anyhow!(e.to_string()))?;
+
+        Ok(())
+    }
+
+    pub fn is_finished(&self) -> bool {
+        self.sink.empty()
+    }
+
     pub fn reset_sink(&mut self) {
         self.sink.stop();
 
@@ -62,8 +74,8 @@ impl RodioBackend {
         self.sink.set_volume(volume);
     }
 
-    pub fn is_paused(&self) {
-        self.sink.is_paused();
+    pub fn is_paused(&self) -> bool {
+        self.sink.is_paused()
     }
 
     pub fn is_empty(&self) -> bool {
