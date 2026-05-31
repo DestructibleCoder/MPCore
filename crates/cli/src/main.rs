@@ -1,11 +1,11 @@
 use anyhow::Result;
 use colored::*;
-use std::env;
 use std::io::{self, Write};
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
+use std::{env, fs};
 
 use corelib::player::{PlaybackState, Player, RepeatMode};
 use corelib::queue::Queue;
@@ -46,7 +46,12 @@ fn main() -> Result<()> {
     let queue = if args.len() == 2 {
         Queue::load_from_folder(Path::new(&args[1]))?
     } else {
-        Queue::load_from_folder(Path::new("./music"))?
+        if fs::exists("~/Music")? {
+            Queue::load_from_folder(Path::new("~/Music"))?
+        } else {
+            fs::create_dir("./music")?;
+            Queue::load_from_folder(Path::new("./music"))?
+        }
     };
 
     let player = Arc::new(Mutex::new(Player::new(queue)?));
@@ -98,7 +103,7 @@ fn main() -> Result<()> {
             }
 
             "help" => {
-                println!("Commands:\n");
+                println!("\n\tCommands:\n");
                 println!("====================");
                 println!("======= play =======");
                 println!("======= pause ======");
@@ -115,6 +120,7 @@ fn main() -> Result<()> {
                 println!("==== save <file> ===");
                 println!("=== repeat <mode> ==");
                 println!("== seek <seconds> ==");
+                println!("===== vol <lvl> ====");
                 println!("====================\n");
             }
 
@@ -271,6 +277,22 @@ fn main() -> Result<()> {
             "quit" => {
                 println!("Bye!");
                 break;
+            }
+
+            "playlist" => {
+                if parts.len() < 2 {
+                    println!(
+                        "usage: playlist <add_to|add_track|del|remove_track|extend|load|save>"
+                    );
+                    continue;
+                }
+
+                match parts[1] {
+                    _ => {
+                        println!("Unknown args");
+                        continue;
+                    }
+                }
             }
 
             _ => {
