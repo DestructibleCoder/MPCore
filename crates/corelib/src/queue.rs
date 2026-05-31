@@ -1,5 +1,4 @@
 use crate::track::Track;
-use crate::track::read_metadata;
 
 use anyhow::Result;
 
@@ -9,8 +8,6 @@ use std::path::Path;
 
 use rand::seq::SliceRandom;
 use serde::{Deserialize, Serialize};
-
-use rodio::{Decoder, Source};
 
 #[derive(Serialize, Deserialize)]
 pub struct Queue {
@@ -29,31 +26,8 @@ impl Queue {
 
             let path = entry.path();
 
-            if !path.is_file() {
-                continue;
-            }
-
-            let Some(extension) = path.extension() else {
-                continue;
-            };
-
-            let extension = extension.to_string_lossy().to_lowercase();
-
-            let supported = matches!(extension.as_str(), "mp3" | "flac" | "wav" | "ogg");
-
-            if supported {
-                let duration = File::open(&path)
-                    .ok()
-                    .and_then(|file| Decoder::try_from(file).ok())
-                    .and_then(|decoder| decoder.total_duration());
-
-                let metadata = read_metadata(&path);
-
-                tracks.push(Track {
-                    path,
-                    duration,
-                    metadata,
-                });
+            if let Ok(track) = Track::from_path(path) {
+                tracks.push(track);
             }
         }
 
@@ -62,14 +36,6 @@ impl Queue {
             original_tracks: tracks,
             current: 0,
         })
-    }
-
-    pub fn save_playlist(&self, path: &Path) -> Result<()> {
-        let file = File::create(path)?;
-
-        serde_json::to_writer_pretty(file, &self.tracks)?;
-
-        Ok(())
     }
 
     pub fn next_track(&mut self) {
@@ -90,6 +56,16 @@ impl Queue {
             tracks,
             current: 0,
         })
+    }
+
+    pub fn add_from_playlist(&mut self, path: &Path) -> Result<()> {
+        let file = File::open(path)?;
+
+        let new_tracks: Vec<Track> = serde_json::from_reader(file)?;
+
+        self.tracks.extend(new_tracks);
+
+        Ok(())
     }
 
     pub fn shuffle(&mut self) {
@@ -122,5 +98,17 @@ impl Queue {
         if index < self.tracks.len() {
             self.current = index;
         }
+    }
+
+    pub fn load_track_from_path(&mut self, path: std::path::PathBuf) -> Result<()> {
+        if let Ok(track) = Track::from_path(path) {
+            self.tracks.push(track);
+        }
+
+        Ok(())
+    }
+
+    pub fn clear(&mut self) {
+        self.tracks.clear();
     }
 }

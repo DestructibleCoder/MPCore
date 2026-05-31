@@ -1,58 +1,527 @@
 [
   {
-    "path": "/home/archer/Music/Bring Me The Horizon/07 - Bring Me The Horizon - 1x1 (feat. Nova Twins).flac",
+    "path": "/home/archer/Music/WithoutRock/01 - Starboy (feat. Daft Punk).flac",
     "duration": {
-      "secs": 209,
-      "nanos": 598140589
+      "secs": 230,
+      "nanos": 453333333
+    },
+    "metadata": {
+      "title": "Starboy (feat. Daft Punk)",
+      "artist": "The Weeknd",
+      "album": "Starboy"
     }
   },
   {
-    "path": "/home/archer/Music/Bring Me The Horizon/02 - Bring Me The Horizon - Parasite Eve.flac",
+    "path": "/home/archer/Music/WithoutRock/06 - Crack A Bottle.mp3",
     "duration": {
-      "secs": 291,
-      "nanos": 812789115
+      "secs": 297,
+      "nanos": 174784580
+    },
+    "metadata": {
+      "title": "Crack A Bottle",
+      "artist": "Eminem; Dr. Dre; 50 Cent",
+      "album": "Curtain Call 2"
     }
   },
   {
-    "path": "/home/archer/Music/Bring Me The Horizon/09 - Bring Me The Horizon - One Day The Only Butterflies Left Will Be In Your Chest As You March Towards Your Death (feat. Amy Lee).flac",
+    "path": "/home/archer/Music/WithoutRock/16 - Mockingbird (Album Version (Explicit)).flac",
     "duration": {
-      "secs": 243,
-      "nanos": 140340136
+      "secs": 250,
+      "nanos": 759999999
+    },
+    "metadata": {
+      "title": "Mockingbird (Album Version (Explicit))",
+      "artist": "Eminem",
+      "album": "Encore"
     }
   },
   {
-    "path": "/home/archer/Music/Bring Me The Horizon/05 - Bring Me The Horizon - Itch For The Cure (When Will We Be Free).flac",
+    "path": "/home/archer/Music/WithoutRock/04 - Yellow Brick Road (Album Version).flac",
     "duration": {
-      "secs": 86,
-      "nanos": 242585034
+      "secs": 346,
+      "nanos": 253333333
+    },
+    "metadata": {
+      "title": "Yellow Brick Road (Album Version)",
+      "artist": "Eminem",
+      "album": "Encore"
     }
   },
   {
-    "path": "/home/archer/Music/Bring Me The Horizon/04 - Bring Me The Horizon - Obey (with YUNGBLUD).flac",
+    "path": "/home/archer/Music/WithoutRock/12 - A Lonely Night.flac",
     "duration": {
       "secs": 220,
-      "nanos": 538934240
+      "nanos": 173333333
+    },
+    "metadata": {
+      "title": "A Lonely Night",
+      "artist": "The Weeknd",
+      "album": "Starboy"
     }
   },
   {
-    "path": "/home/archer/Music/Bring Me The Horizon/03 - Bring Me The Horizon - Teardrops.flac",
+    "path": "/home/archer/Music/WithoutRock/09 - Sidewalks (feat. Kendrick Lamar).flac",
     "duration": {
-      "secs": 215,
-      "nanos": 3968253
+      "secs": 231,
+      "nanos": 360000000
+    },
+    "metadata": {
+      "title": "Sidewalks (feat. Kendrick Lamar)",
+      "artist": "The Weeknd",
+      "album": "Starboy"
     }
   },
   {
-    "path": "/home/archer/Music/Bring Me The Horizon/06 - Bring Me The Horizon - Kingslayer (feat. BABYMETAL).flac",
+    "path": "/home/archer/Music/WithoutRock/07 - True Colors.flac",
+    "duration": {
+      "secs": 206,
+      "nanos": 26666666
+    },
+    "metadata": {
+      "title": "True Colors",
+      "artist": "The Weeknd",
+      "album": "Starboy"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/05 - Rockin'.flac",
+    "duration": {
+      "secs": 232,
+      "nanos": 879999999
+    },
+    "metadata": {
+      "title": "Rockin'",
+      "artist": "The Weeknd",
+      "album": "Starboy"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/09 - Blinding Lights.flac",
+    "duration": {
+      "secs": 200,
+      "nanos": 45827664
+    },
+    "metadata": {
+      "title": "Blinding Lights",
+      "artist": "The Weeknd",
+      "album": "After Hours (Deluxe)"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/14 - Ass Like That (Album Version (Explicit)).flac",
+    "duration": {
+      "secs": 265,
+      "nanos": 480000000
+    },
+    "metadata": {
+      "title": "Ass Like That (Album Version (Explicit))",
+      "artist": "Eminem",
+      "album": "Encore"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/Eminem feat. Juice WRLD - Godzilla (Radio Edit) XMIXR.mp3",
+    "duration": {
+      "secs": 210,
+      "nanos": 834285714
+    },
+    "metadata": {
+      "title": "Godzilla (Radio Edit) XMIXR",
+      "artist": "Eminem feat. Juice WRLD",
+      "album": "XMiX Radioactive Urban Radio 212 (Mar 2020)"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/50 Cent - You Don't Know (Feat. Eminem, LLoyd Banks & Cashis) (Extended).mp3",
+    "duration": {
+      "secs": 259,
+      "nanos": 317551020
+    },
+    "metadata": {
+      "title": "50 Cent - You Don't Know (Feat. Eminem, LLoyd Banks & Cashis) (Extended)",
+      "artist": null,
+      "album": null
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/06 - Secrets.flac",
+    "duration": {
+      "secs": 265,
+      "nanos": 600000000
+    },
+    "metadata": {
+      "title": "Secrets",
+      "artist": "The Weeknd",
+      "album": "Starboy"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/10 - Six Feet Under.flac",
+    "duration": {
+      "secs": 237,
+      "nanos": 573333333
+    },
+    "metadata": {
+      "title": "Six Feet Under",
+      "artist": "The Weeknd",
+      "album": "Starboy"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/02 - Evil Deeds (Album Version).flac",
+    "duration": {
+      "secs": 259,
+      "nanos": 573333333
+    },
+    "metadata": {
+      "title": "Evil Deeds (Album Version)",
+      "artist": "Eminem",
+      "album": "Encore"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/15 - Spend Some Time (Album Version (Explicit)).flac",
+    "duration": {
+      "secs": 310,
+      "nanos": 720000000
+    },
+    "metadata": {
+      "title": "Spend Some Time (Album Version (Explicit))",
+      "artist": "Eminem",
+      "album": "Encore"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/03 - False Alarm.flac",
     "duration": {
       "secs": 220,
-      "nanos": 41541950
+      "nanos": 306666666
+    },
+    "metadata": {
+      "title": "False Alarm",
+      "artist": "The Weeknd",
+      "album": "Starboy"
     }
   },
   {
-    "path": "/home/archer/Music/Bring Me The Horizon/08 - Bring Me The Horizon - Ludens.flac",
+    "path": "/home/archer/Music/WithoutRock/08 - My 1st Single (Album Version).flac",
     "duration": {
-      "secs": 280,
-      "nanos": 151519274
+      "secs": 302,
+      "nanos": 839999999
+    },
+    "metadata": {
+      "title": "My 1st Single (Album Version)",
+      "artist": "Eminem",
+      "album": "Encore"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/17 - Crazy In Love (Album Version (Explicit)).flac",
+    "duration": {
+      "secs": 242,
+      "nanos": 306666666
+    },
+    "metadata": {
+      "title": "Crazy In Love (Album Version (Explicit))",
+      "artist": "Eminem",
+      "album": "Encore"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/02 - Party Monster.flac",
+    "duration": {
+      "secs": 249,
+      "nanos": 213333333
+    },
+    "metadata": {
+      "title": "Party Monster",
+      "artist": "The Weeknd",
+      "album": "Starboy"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/03 - Never Enough (Album Version).flac",
+    "duration": {
+      "secs": 159,
+      "nanos": 786666666
+    },
+    "metadata": {
+      "title": "Never Enough (Album Version)",
+      "artist": "Eminem",
+      "album": "Encore"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/01 - Control.flac",
+    "duration": {
+      "secs": 251,
+      "nanos": 199999999
+    },
+    "metadata": {
+      "title": "Control",
+      "artist": "NEFFEX",
+      "album": "Control"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/17 - Die For You.flac",
+    "duration": {
+      "secs": 260,
+      "nanos": 253333333
+    },
+    "metadata": {
+      "title": "Die For You",
+      "artist": "The Weeknd",
+      "album": "Starboy"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/D12 - My Band - 01 - My Band.flac",
+    "duration": {
+      "secs": 300,
+      "nanos": 186666666
+    },
+    "metadata": {
+      "title": "My Band",
+      "artist": "D12",
+      "album": "My Band"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/05 - Like Toy Soldiers (Album Version).flac",
+    "duration": {
+      "secs": 296,
+      "nanos": 879999999
+    },
+    "metadata": {
+      "title": "Like Toy Soldiers (Album Version)",
+      "artist": "Eminem",
+      "album": "Encore"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/The Weeknd - After Hours - 09 - Blinding Lights.flac",
+    "duration": {
+      "secs": 200,
+      "nanos": 45827664
+    },
+    "metadata": {
+      "title": "Blinding Lights",
+      "artist": "The Weeknd",
+      "album": "After Hours"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/11 - Big Weenie (Album Version (Explicit)).flac",
+    "duration": {
+      "secs": 266,
+      "nanos": 933333333
+    },
+    "metadata": {
+      "title": "Big Weenie (Album Version (Explicit))",
+      "artist": "Eminem",
+      "album": "Encore"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/Statement.flac",
+    "duration": {
+      "secs": 186,
+      "nanos": 947369614
+    },
+    "metadata": {
+      "title": "Statement",
+      "artist": "NEFFEX",
+      "album": "Built to Last: The Collection"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/06 - Mosh (Album Version).flac",
+    "duration": {
+      "secs": 317,
+      "nanos": 813333333
+    },
+    "metadata": {
+      "title": "Mosh (Album Version)",
+      "artist": "Eminem",
+      "album": "Encore"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/15 - Nothing Without You.flac",
+    "duration": {
+      "secs": 198,
+      "nanos": 653333333
+    },
+    "metadata": {
+      "title": "Nothing Without You",
+      "artist": "The Weeknd",
+      "album": "Starboy"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/12_Wiz_Khalifa_-_Black_and_Yellow_(Better_Quality_Acapella)-Djleak.com.mp3",
+    "duration": null,
+    "metadata": {
+      "title": null,
+      "artist": null,
+      "album": null
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/16. The Weeknd - Save Your Tears.mp3",
+    "duration": {
+      "secs": 217,
+      "nanos": 573333333
+    },
+    "metadata": {
+      "title": "SAVE YOUR TEARS",
+      "artist": "THE WEEKND",
+      "album": "NRJ FRESH HITS 2021"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/Akon_Konvicted_02_Smack That_FLAC.flac",
+    "duration": {
+      "secs": 211,
+      "nanos": 773333333
+    },
+    "metadata": {
+      "title": "Smack That",
+      "artist": "Akon",
+      "album": "Konvicted"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/18 - One Shot 2 Shot (Album Version (Explicit)).flac",
+    "duration": {
+      "secs": 266,
+      "nanos": 573333333
+    },
+    "metadata": {
+      "title": "One Shot 2 Shot (Album Version (Explicit))",
+      "artist": "Eminem",
+      "album": "Encore"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/13 - Just Lose It (Album Version (Explicit)).flac",
+    "duration": {
+      "secs": 248,
+      "nanos": 680000000
+    },
+    "metadata": {
+      "title": "Just Lose It (Album Version (Explicit))",
+      "artist": "Eminem",
+      "album": "Encore"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/07 - Puke (Album Version).flac",
+    "duration": {
+      "secs": 247,
+      "nanos": 826666666
+    },
+    "metadata": {
+      "title": "Puke (Album Version)",
+      "artist": "Eminem",
+      "album": "Encore"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/11 - Love To Lay.flac",
+    "duration": {
+      "secs": 223,
+      "nanos": 293333333
+    },
+    "metadata": {
+      "title": "Love To Lay",
+      "artist": "The Weeknd",
+      "album": "Starboy"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/08 - Stargirl Interlude (feat. Lana Del Rey).flac",
+    "duration": {
+      "secs": 111,
+      "nanos": 626666666
+    },
+    "metadata": {
+      "title": "Stargirl Interlude (feat. Lana Del Rey)",
+      "artist": "The Weeknd",
+      "album": "Starboy"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/01 - Curtains Up (Album Version).flac",
+    "duration": {
+      "secs": 46,
+      "nanos": 866666666
+    },
+    "metadata": {
+      "title": "Curtains Up (Album Version)",
+      "artist": "Eminem",
+      "album": "Encore"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/10 - Rain Man (Album Version).flac",
+    "duration": {
+      "secs": 313,
+      "nanos": 946666666
+    },
+    "metadata": {
+      "title": "Rain Man (Album Version)",
+      "artist": "Eminem",
+      "album": "Encore"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/04 - Reminder.flac",
+    "duration": {
+      "secs": 218,
+      "nanos": 879999999
+    },
+    "metadata": {
+      "title": "Reminder",
+      "artist": "The Weeknd",
+      "album": "Starboy"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/18 - I Feel It Coming (feat. Daft Punk).flac",
+    "duration": {
+      "secs": 269,
+      "nanos": 173333333
+    },
+    "metadata": {
+      "title": "I Feel It Coming (feat. Daft Punk)",
+      "artist": "The Weeknd",
+      "album": "Starboy"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/20 - Encore_Curtains Down (Album Version (Explicit)).flac",
+    "duration": {
+      "secs": 348,
+      "nanos": 399999999
+    },
+    "metadata": {
+      "title": "Encore/Curtains Down (Album Version (Explicit))",
+      "artist": "Eminem",
+      "album": "Encore"
+    }
+  },
+  {
+    "path": "/home/archer/Music/WithoutRock/19 - Starboy Kygo Remix (feat. Daft Punk).flac",
+    "duration": {
+      "secs": 244,
+      "nanos": 759999999
+    },
+    "metadata": {
+      "title": "Starboy Kygo Remix (feat. Daft Punk)",
+      "artist": "The Weeknd",
+      "album": "Starboy"
     }
   }
 ]
