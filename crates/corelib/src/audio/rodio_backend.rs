@@ -7,6 +7,19 @@ use anyhow::Result;
 use rodio::mixer::Mixer;
 use rodio::{Decoder, OutputStream, OutputStreamBuilder, Sink, Source};
 
+pub trait AudioBackend: Send {
+    fn seek(&self, position: Duration) -> Result<()>;
+    fn is_finished(&self) -> bool;
+    fn reset_sink(&mut self);
+    fn play_file(&mut self, path: &Path) -> Result<Option<Duration>>;
+    fn pause(&self);
+    fn play(&self);
+    fn stop(&self);
+    fn set_volume(&self, vol: f32);
+    fn is_paused(&self) -> bool;
+    fn is_empty(&self) -> bool;
+}
+
 pub struct RodioBackend {
     _stream: OutputStream,
     mixer: Mixer,
@@ -27,8 +40,10 @@ impl RodioBackend {
             sink,
         })
     }
+}
 
-    pub fn seek(&self, position: Duration) -> Result<()> {
+impl AudioBackend for RodioBackend {
+    fn seek(&self, position: Duration) -> Result<()> {
         self.sink
             .try_seek(position)
             .map_err(|e| anyhow::anyhow!(e.to_string()))?;
@@ -36,17 +51,17 @@ impl RodioBackend {
         Ok(())
     }
 
-    pub fn is_finished(&self) -> bool {
+    fn is_finished(&self) -> bool {
         self.sink.empty()
     }
 
-    pub fn reset_sink(&mut self) {
+    fn reset_sink(&mut self) {
         self.sink.stop();
 
         self.sink = Sink::connect_new(&self.mixer);
     }
 
-    pub fn play_file(&mut self, path: &Path) -> Result<Option<Duration>> {
+    fn play_file(&mut self, path: &Path) -> Result<Option<Duration>> {
         let file = File::open(path)?;
 
         let source = Decoder::try_from(file)?;
@@ -58,27 +73,27 @@ impl RodioBackend {
         Ok(duration)
     }
 
-    pub fn pause(&self) {
+    fn pause(&self) {
         self.sink.pause();
     }
 
-    pub fn play(&self) {
+    fn play(&self) {
         self.sink.play();
     }
 
-    pub fn stop(&self) {
+    fn stop(&self) {
         self.sink.stop();
     }
 
-    pub fn set_volume(&self, volume: f32) {
+    fn set_volume(&self, volume: f32) {
         self.sink.set_volume(volume);
     }
 
-    pub fn is_paused(&self) -> bool {
+    fn is_paused(&self) -> bool {
         self.sink.is_paused()
     }
 
-    pub fn is_empty(&self) -> bool {
+    fn is_empty(&self) -> bool {
         self.sink.empty()
     }
 }

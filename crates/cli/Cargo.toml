@@ -8,3 +8,6 @@ corelib = { path = "../corelib" }
 anyhow = "1"
 colored = "2"
 env_logger = "0.11"
+rustyline = { version = "18.0.0", features= ["derive"]}
+shlex = "2.0.1"
+dirs = "6.0.0"

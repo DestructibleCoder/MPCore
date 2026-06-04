@@ -3,7 +3,8 @@ use anyhow::Result;
 use std::path::Path;
 use std::time::Duration;
 
-use crate::audio::RodioBackend;
+use crate::audio::{AudioBackend, RodioBackend};
+use crate::playlist::Playlist;
 use crate::queue::Queue;
 
 #[derive(Debug, Clone, Copy)]
@@ -22,7 +23,7 @@ pub enum RepeatMode {
 
 pub struct Player {
     queue: Queue,
-    backend: RodioBackend,
+    backend: Box<dyn AudioBackend>,
     state: PlaybackState,
 
     repeat_mode: RepeatMode,
@@ -34,7 +35,7 @@ impl Player {
 
         Ok(Self {
             queue,
-            backend,
+            backend: Box::new(backend),
             state: PlaybackState::Stopped,
 
             repeat_mode: RepeatMode::None,
@@ -51,6 +52,10 @@ impl Player {
         self.queue.save_playlist(path)
     }
 
+    pub fn shuffle_around(&mut self) {
+        self.queue.shuffle_around();
+    }
+
     pub fn load_playlist(&mut self, path: &Path) -> Result<()> {
         self.queue = Queue::load_playlist(path)?;
 
@@ -61,7 +66,11 @@ impl Player {
         if matches!(self.state(), PlaybackState::Playing) && self.backend.is_finished() {
             match self.repeat_mode() {
                 RepeatMode::None => {
-                    if self.queue.current + 1 < self.queue.tracks.len() {
+                    let curr = self
+                        .queue
+                        .current()
+                        .ok_or(anyhow::anyhow!("Queue is empty!"))?;
+                    if curr + 1 < self.queue.tracks().len() {
                         self.next_track()?;
                     } else {
                         self.state = PlaybackState::Stopped;
@@ -98,7 +107,7 @@ impl Player {
     }
 
     pub fn play_current(&mut self) -> Result<()> {
-        if self.queue.tracks.is_empty() {
+        if self.queue.tracks().is_empty() {
             return Ok(());
         }
 
@@ -108,7 +117,11 @@ impl Player {
             return Ok(());
         }
 
-        let track = &self.queue.tracks[self.queue.current];
+        let curr = self
+            .queue
+            .current()
+            .ok_or(anyhow::anyhow!("Queue is empty!"))?;
+        let track = &self.queue.tracks()[curr];
 
         self.backend.play_file(&track.path)?;
 
@@ -130,7 +143,8 @@ impl Player {
     }
 
     pub fn current_track_name(&self) -> Option<String> {
-        let track = self.queue.tracks.get(self.queue.current)?;
+        let curr = self.queue.current()?;
+        let track = self.queue.get_track(curr)?;
 
         if let Some(title) = &track.metadata.title {
             if let Some(artist) = &track.metadata.artist {
@@ -147,7 +161,8 @@ impl Player {
     }
 
     pub fn get_track_info(&self) -> Option<String> {
-        let track = self.queue.tracks.get(self.queue.current)?;
+        let curr = self.queue.current()?;
+        let track = self.queue.get_track(curr)?;
 
         if let Some(title) = &track.metadata.title {
             if let Some(artist) = &track.metadata.artist {
@@ -210,5 +225,19 @@ impl Player {
 
     pub fn queue(&self) -> &Queue {
         &self.queue
+    }
+
+    pub fn extend_playlist(&self, path: &Path) -> Result<()> {
+        match Playlist::load(&path) {
+            Ok(mut playlist) => {
+                playlist.add_tracks_from_queue(self.queue());
+                playlist.save(path)?;
+                Ok(())
+            }
+
+            Err(_) => {
+                anyhow::bail!("Can't open playlist {:?}!", path.to_str());
+            }
+        }
     }
 }

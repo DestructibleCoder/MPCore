@@ -1,3 +1,4 @@
+use crate::playlist::Playlist;
 use crate::track::Track;
 
 use anyhow::Result;
@@ -11,13 +12,21 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct Queue {
-    pub tracks: Vec<Track>,
+    tracks: Vec<Track>,
     #[serde(skip)]
-    original_tracks: Vec<Track>,
-    pub current: usize,
+    order: Vec<usize>,
+    current: Option<usize>,
 }
 
 impl Queue {
+    pub fn new() -> Self {
+        Self {
+            tracks: Vec::new(),
+            order: Vec::new(),
+            current: None,
+        }
+    }
+
     pub fn load_from_folder(path: &Path) -> Result<Self> {
         let mut tracks = Vec::new();
 
@@ -31,31 +40,48 @@ impl Queue {
             }
         }
 
+        let len = tracks.len();
+
         Ok(Self {
-            tracks: tracks.clone(),
-            original_tracks: tracks,
-            current: 0,
+            tracks: tracks,
+            order: (0..len).collect(),
+            current: if len > 0 { Some(0) } else { None },
         })
     }
 
     pub fn next_track(&mut self) {
-        if self.tracks.is_empty() {
+        let Some(current) = self.current else {
+            return;
+        };
+
+        if self.order.is_empty() {
             return;
         }
 
-        self.current = (self.current + 1) % self.tracks.len();
+        self.current = Some((current + 1) % self.order.len())
     }
 
     pub fn load_playlist(path: &Path) -> Result<Self> {
-        let file = File::open(path)?;
+        let playlist: Playlist = Playlist::load(path)?;
 
-        let tracks: Vec<Track> = serde_json::from_reader(file)?;
+        let len = playlist.tracks.len();
 
         Ok(Self {
-            original_tracks: tracks.clone(),
-            tracks,
-            current: 0,
+            tracks: playlist.tracks,
+            order: (0..len).collect(),
+            current: if len > 0 { Some(0) } else { None },
         })
+    }
+
+    pub fn save_playlist(&self, path: &Path) -> Result<()> {
+        let Some(name) = path.file_stem().and_then(|name| name.to_str()) else {
+            anyhow::bail!("Bad filename!");
+        };
+        let playlist: Playlist = Playlist::new(name.to_string(), self.tracks.clone());
+
+        playlist.save(path)?;
+
+        Ok(())
     }
 
     pub fn add_from_playlist(&mut self, path: &Path) -> Result<()> {
@@ -71,38 +97,68 @@ impl Queue {
     pub fn shuffle(&mut self) {
         let mut rng = rand::rng();
 
-        self.tracks.shuffle(&mut rng);
+        self.order.shuffle(&mut rng);
 
-        self.current = 0;
+        self.current = Some(0);
     }
 
     pub fn unshuffle(&mut self) {
-        self.tracks = self.original_tracks.clone();
-
-        self.current = 0;
+        self.order = (0..self.tracks.len()).collect();
     }
 
-    pub fn previous_track(&mut self) {
-        if self.tracks.is_empty() {
+    pub fn shuffle_around(&mut self) {
+        let Some(current) = self.current else {
+            return;
+        };
+
+        if self.order.len() <= 1 {
             return;
         }
 
-        self.current = if self.current == 0 {
-            self.tracks.len() - 1
-        } else {
-            self.current - 1
+        let current_track = self.order[current];
+
+        self.order.remove(current);
+
+        let mut rng = rand::rng();
+        self.order.shuffle(&mut rng);
+
+        self.order.insert(0, current_track);
+
+        self.current = Some(0);
+    }
+
+    pub fn previous_track(&mut self) {
+        let Some(current) = self.current else {
+            return;
         };
+
+        if self.order.is_empty() {
+            return;
+        }
+
+        self.current = Some(if current == 0 {
+            self.order.len() - 1
+        } else {
+            current - 1
+        })
     }
 
     pub fn set_current(&mut self, index: usize) {
-        if index < self.tracks.len() {
-            self.current = index;
+        if index < self.order.len() {
+            self.current = Some(index);
         }
     }
 
     pub fn load_track_from_path(&mut self, path: std::path::PathBuf) -> Result<()> {
-        if let Ok(track) = Track::from_path(path) {
-            self.tracks.push(track);
+        let track = Track::from_path(path)?;
+
+        let idx = self.tracks.len();
+
+        self.tracks.push(track);
+        self.order.push(idx);
+
+        if self.current.is_none() {
+            self.current = Some(0);
         }
 
         Ok(())
@@ -110,5 +166,27 @@ impl Queue {
 
     pub fn clear(&mut self) {
         self.tracks.clear();
+        self.order.clear();
+        self.current = None;
+    }
+
+    pub fn get_track(&self, index: usize) -> Option<&Track> {
+        let real_index = *self.order.get(index)?;
+
+        self.tracks.get(real_index)
+    }
+
+    pub fn current_track(&self) -> Option<&Track> {
+        let current = self.current?;
+
+        self.get_track(current)
+    }
+
+    pub fn current(&self) -> Option<usize> {
+        self.current
+    }
+
+    pub fn tracks(&self) -> &[Track] {
+        &self.tracks
     }
 }

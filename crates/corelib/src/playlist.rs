@@ -23,6 +23,10 @@ pub struct Playlist {
 }
 
 impl Playlist {
+    pub fn new(name: String, tracks: Vec<Track>) -> Self {
+        Self { name, tracks }
+    }
+
     pub fn save(&self, path: &Path) -> Result<()> {
         let json = serde_json::to_string_pretty(self)?;
 
@@ -62,7 +66,8 @@ impl Playlist {
     }
 
     pub fn add_tracks_from_queue(&mut self, queue: &Queue) {
-        self.tracks.extend(queue.tracks.clone());
+        let add = queue.tracks();
+        self.tracks.extend(add.iter().cloned());
     }
 
     pub fn add_tracks_from_folder(&mut self, path: &Path) -> Result<()> {

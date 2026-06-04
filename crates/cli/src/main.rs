@@ -1,305 +1,73 @@
+mod commands;
+mod handler;
+mod prompt;
+
 use anyhow::Result;
-use colored::*;
-use std::io::{self, Write};
-use std::path::Path;
 use std::sync::{Arc, Mutex};
-use std::thread;
-use std::time::Duration;
-use std::{env, fs};
 
-use corelib::player::{PlaybackState, Player, RepeatMode};
+use rustyline::Editor;
+use rustyline::history::DefaultHistory;
+
+use commands::Command;
+use corelib::player::{PlaybackState, Player};
 use corelib::queue::Queue;
+use prompt::CliHelper;
 
-fn render_prompt(state: PlaybackState) -> String {
+fn get_plain_prompt(state: PlaybackState) -> &'static str {
     match state {
-        PlaybackState::Playing => {
-            format!("{} > ", "▶ playing".green())
-        }
-        PlaybackState::Paused => {
-            format!("{} > ", "⏸ paused".yellow())
-        }
-        PlaybackState::Stopped => {
-            format!("{} > ", "■ stopped".red())
-        }
-    }
-}
-
-fn format_duration_optional(duration: Option<Duration>) -> String {
-    match duration {
-        Some(d) => {
-            let secs = d.as_secs();
-
-            let minutes = secs / 60;
-
-            let seconds = secs % 60;
-
-            format!("{:02}:{:02}", minutes, seconds)
-        }
-
-        None => String::from("--:--"),
+        PlaybackState::Playing => "▶ playing > ",
+        PlaybackState::Paused => "⏸ paused > ",
+        PlaybackState::Stopped => "■ stopped > ",
     }
 }
 
 fn main() -> Result<()> {
-    let args: Vec<String> = env::args().collect();
+    let music_dir = dirs::audio_dir().unwrap_or_else(|| std::path::PathBuf::from("./music"));
 
-    let queue = if args.len() == 2 {
-        Queue::load_from_folder(Path::new(&args[1]))?
-    } else {
-        if fs::exists("~/Music")? {
-            Queue::load_from_folder(Path::new("~/Music"))?
-        } else {
-            fs::create_dir("./music")?;
-            Queue::load_from_folder(Path::new("./music"))?
-        }
-    };
-
+    let queue = Queue::load_from_folder(&music_dir).unwrap_or_else(|_| Queue::new());
     let player = Arc::new(Mutex::new(Player::new(queue)?));
 
-    let autoplay_player = Arc::clone(&player);
+    let mut rl: Editor<CliHelper, DefaultHistory> = Editor::new()?;
 
-    thread::spawn(move || {
-        loop {
-            {
-                let mut player = autoplay_player.lock().unwrap();
+    let helper = CliHelper {
+        player: Arc::clone(&player),
+    };
+    rl.set_helper(Some(helper));
+    let _ = rl.load_history(".mpcore_history");
 
-                player.update().unwrap();
-            }
-
-            thread::sleep(Duration::from_millis(500));
-        }
-    });
-
-    println!("Welcome to MPCore CLI");
+    println!("Welcome to MpCore CLI!");
 
     loop {
-        print!("{}", render_prompt(player.lock().unwrap().state()));
-        io::stdout().flush()?;
+        let state = player.lock().unwrap().state();
+        let prompt = get_plain_prompt(state);
 
-        let mut input = String::new();
+        match rl.readline(prompt) {
+            Ok(line) => {
+                let input = line.trim();
+                if input.is_empty() {
+                    continue;
+                }
 
-        io::stdin().read_line(&mut input)?;
+                let _ = rl.add_history_entry(input);
 
-        let parts: Vec<&str> = input.trim().split_whitespace().collect();
-
-        if parts.is_empty() {
-            continue;
-        }
-
-        match parts[0] {
-            "play" => {
-                if parts.len() == 2 {
-                    match parts[1].parse::<usize>() {
-                        Ok(index) => {
-                            player.lock().unwrap().play_track(index)?;
+                if let Some(cmd) = Command::parse(input) {
+                    match handler::execute_command(cmd, &player) {
+                        Ok(should_exit) => {
+                            if should_exit {
+                                break;
+                            }
                         }
-                        Err(_) => {
-                            println!("Index out of range");
-                        }
+                        Err(e) => println!("Error: {}", e),
                     }
                 } else {
-                    player.lock().unwrap().play_current()?;
+                    println!("Unknown command or unknown args.");
                 }
             }
-
-            "help" => {
-                println!("\n\tCommands:\n");
-                println!("====================");
-                println!("======= play =======");
-                println!("======= pause ======");
-                println!("======= stop =======");
-                println!("======= next =======");
-                println!("======= prev =======");
-                println!("======= quit =======");
-                println!("======= name =======");
-                println!("======= list =======");
-                println!("====== status ======");
-                println!("=== play <index> ===");
-                println!("= shuffle <on|off> =");
-                println!("==== load <file> ===");
-                println!("==== save <file> ===");
-                println!("=== repeat <mode> ==");
-                println!("== seek <seconds> ==");
-                println!("===== vol <lvl> ====");
-                println!("====================\n");
-            }
-
-            "save" => {
-                if parts.len() != 2 {
-                    println!("save <file>");
-                    continue;
-                }
-
-                player.lock().unwrap().save_playlist(Path::new(parts[1]))?;
-
-                println!("Playlist saved in {}!", parts[1]);
-            }
-
-            "load" => {
-                if parts.len() != 2 {
-                    println!("load <file>");
-                    continue;
-                }
-
-                player.lock().unwrap().load_playlist(Path::new(parts[1]))?;
-
-                println!("Playlist {} loaded!", parts[1]);
-            }
-
-            "repeat" => {
-                if parts.len() != 2 {
-                    println!("repeat <none|queue|track>");
-                    continue;
-                }
-
-                match parts[1] {
-                    "none" => {
-                        player.lock().unwrap().set_repeat_mode(RepeatMode::None);
-                    }
-
-                    "queue" => {
-                        player.lock().unwrap().set_repeat_mode(RepeatMode::Queue);
-                    }
-
-                    "track" => {
-                        player.lock().unwrap().set_repeat_mode(RepeatMode::Track);
-                    }
-
-                    _ => {
-                        println!("Unknown repeat mode!");
-                    }
-                }
-            }
-
-            "shuffle" => {
-                if parts.len() != 2 {
-                    println!("shuffle <on|off>");
-                    continue;
-                }
-
-                match parts[1] {
-                    "on" => {
-                        player.lock().unwrap().shuffle();
-                        println!("shuffle enabled");
-                    }
-
-                    "off" => {
-                        player.lock().unwrap().unshuffle();
-                        println!("shuffle disabled");
-                    }
-
-                    _ => {
-                        println!("Unknown shuffle mode!");
-                    }
-                }
-            }
-
-            "pause" => {
-                player.lock().unwrap().pause();
-            }
-
-            "stop" => {
-                player.lock().unwrap().stop();
-            }
-
-            "next" => {
-                player.lock().unwrap().next_track()?;
-            }
-
-            "prev" => {
-                player.lock().unwrap().previous_track()?;
-            }
-
-            "vol" => {
-                if parts.len() < 2 {
-                    println!("Usage: vol <number>");
-                    continue;
-                }
-
-                let volume: f32 = match parts[1].parse() {
-                    Ok(v) => v,
-                    Err(_) => {
-                        println!("Invalid volume!");
-                        continue;
-                    }
-                };
-
-                player.lock().unwrap().set_volume(volume);
-
-                println!("volume set to {}", volume);
-            }
-
-            "seek" => {
-                if parts.len() != 2 {
-                    println!("seek <seconds>");
-                    continue;
-                }
-
-                let Ok(seconds) = parts[1].parse::<u64>() else {
-                    println!("Invalid number");
-                    continue;
-                };
-
-                player.lock().unwrap().seek(seconds)?;
-            }
-
-            "list" => {
-                for (i, track) in player.lock().unwrap().queue().tracks.iter().enumerate() {
-                    let name = if let Some(title) = &track.metadata.title {
-                        if let Some(artist) = &track.metadata.artist {
-                            format!("{} - {}", artist, title)
-                        } else {
-                            title.clone()
-                        }
-                    } else {
-                        track
-                            .path
-                            .file_name()
-                            .unwrap_or_default()
-                            .to_string_lossy()
-                            .to_string()
-                    };
-
-                    println!(
-                        "{:>2}. {:<80} {}",
-                        i,
-                        name,
-                        format_duration_optional(track.duration)
-                    );
-                }
-            }
-
-            "name" => match player.lock().unwrap().get_track_info() {
-                Some(track_info) => println!("{}", track_info),
-                None => println!("No tracks selected"),
-            },
-
-            "quit" => {
-                println!("Bye!");
-                break;
-            }
-
-            "playlist" => {
-                if parts.len() < 2 {
-                    println!(
-                        "usage: playlist <add_to|add_track|del|remove_track|extend|load|save>"
-                    );
-                    continue;
-                }
-
-                match parts[1] {
-                    _ => {
-                        println!("Unknown args");
-                        continue;
-                    }
-                }
-            }
-
-            _ => {
-                println!("Unknown command");
-            }
+            Err(_) => break,
         }
     }
 
+    let _ = rl.save_history(".mpcore_history");
+    println!("Bye Bye! :3");
     Ok(())
 }
