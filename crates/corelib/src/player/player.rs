@@ -3,7 +3,7 @@ use anyhow::Result;
 use std::path::Path;
 use std::time::Duration;
 
-use crate::audio::{AudioBackend, RodioBackend};
+use crate::audio::{AudioEngine, RodioBackend, SymphoniaDecoder};
 use crate::playlist::Playlist;
 use crate::queue::Queue;
 
@@ -23,7 +23,7 @@ pub enum RepeatMode {
 
 pub struct Player {
     queue: Queue,
-    backend: Box<dyn AudioBackend>,
+    engine: AudioEngine,
     state: PlaybackState,
 
     repeat_mode: RepeatMode,
@@ -32,10 +32,13 @@ pub struct Player {
 impl Player {
     pub fn new(queue: Queue) -> Result<Self> {
         let backend = RodioBackend::new()?;
+        let decoder = SymphoniaDecoder;
+
+        let engine = AudioEngine::new(Box::new(decoder), Box::new(backend));
 
         Ok(Self {
             queue,
-            backend: Box::new(backend),
+            engine: engine,
             state: PlaybackState::Stopped,
 
             repeat_mode: RepeatMode::None,
@@ -43,7 +46,7 @@ impl Player {
     }
 
     pub fn seek(&mut self, seconds: u64) -> Result<()> {
-        self.backend.seek(Duration::from_secs(seconds))?;
+        self.engine.seek(Duration::from_secs(seconds))?;
 
         Ok(())
     }
