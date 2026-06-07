@@ -1,4 +1,14 @@
-mod rodio_backend;
+pub mod engine;
+pub mod source;
 
-pub use rodio_backend::AudioBackend;
-pub use rodio_backend::RodioBackend;
+pub mod backend;
+pub mod decoder;
+
+pub use engine::AudioEngine;
+pub use source::AudioSource;
+
+pub use backend::AudioBackend;
+pub use backend::RodioBackend;
+
+pub use decoder::AudioDecoder;
+pub use decoder::SymphoniaDecoder;
