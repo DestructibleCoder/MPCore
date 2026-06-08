@@ -49,7 +49,8 @@ fn cmd_list(player: &Arc<Mutex<Player>>) -> Result<()> {
 pub fn execute_command(cmd: Command, player: &Arc<Mutex<Player>>) -> Result<bool> {
     match cmd {
         Command::Play(Some(idx)) => {
-            player.lock().unwrap().play_track(idx)?;
+            println!("Function in developing");
+            // player.lock().unwrap().play_track(idx)?;
         }
         Command::Play(None) => player.lock().unwrap().resume(),
         Command::Pause => player.lock().unwrap().pause(),

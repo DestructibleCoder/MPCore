@@ -40,4 +40,12 @@ impl AudioEngine {
 
         Ok(())
     }
+
+    pub fn set_volume(&self, vol: f32) {
+        self.backend.set_volume(vol);
+    }
+
+    pub fn reset_sink(&self) {
+        self.backend.reset_sink();
+    }
 }

@@ -1,5 +1,7 @@
 mod player;
+mod state;
 
-pub use player::PlaybackState;
 pub use player::Player;
-pub use player::RepeatMode;
+pub use state::BackendState;
+pub use state::PlaybackState;
+pub use state::RepeatMode;

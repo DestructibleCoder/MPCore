@@ -63,4 +63,8 @@ impl AudioBackend for RodioBackend {
     fn is_paused(&self) -> bool {
         self.sink.is_paused()
     }
+
+    fn reset_sink(&self) {
+        self.sink.clear();
+    }
 }
