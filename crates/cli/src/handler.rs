@@ -4,6 +4,21 @@ use corelib::player::Player;
 use corelib::playlist::Playlist;
 use std::sync::{Arc, Mutex};
 
+fn cmd_name(player: &Arc<Mutex<Player>>) -> Result<()> {
+    let track_name = player.lock().unwrap().current_track_name();
+
+    match track_name {
+        Some(output) => {
+            println!("{}", output);
+            Ok(())
+        }
+
+        None => {
+            anyhow::bail!("Can't read track info!");
+        }
+    }
+}
+
 fn cmd_list(player: &Arc<Mutex<Player>>) -> Result<()> {
     let p = player.lock().unwrap();
     let tracks = p.queue().tracks();
@@ -48,10 +63,7 @@ fn cmd_list(player: &Arc<Mutex<Player>>) -> Result<()> {
 
 pub fn execute_command(cmd: Command, player: &Arc<Mutex<Player>>) -> Result<bool> {
     match cmd {
-        Command::Play(Some(idx)) => {
-            println!("Function in developing");
-            // player.lock().unwrap().play_track(idx)?;
-        }
+        Command::Play(Some(idx)) => player.lock().unwrap().play_by_index(Some(idx))?,
         Command::Play(None) => player.lock().unwrap().resume(),
         Command::Pause => player.lock().unwrap().pause(),
         Command::Resume => player.lock().unwrap().resume(),
@@ -62,7 +74,10 @@ pub fn execute_command(cmd: Command, player: &Arc<Mutex<Player>>) -> Result<bool
         Command::Seek(seconds) => player.lock().unwrap().seek(seconds)?,
 
         Command::List => cmd_list(player)?,
-        Command::Volume(vol) => player.lock().unwrap().set_volume(vol),
+        Command::Volume(None) => println!("volume: {}%", (player.lock().unwrap().volume() * 100.0)),
+        Command::Volume(Some(vol)) => player.lock().unwrap().set_volume(vol),
+
+        Command::Name => cmd_name(player)?,
 
         Command::Playlist(sub_cmd) => match sub_cmd {
             PlaylistCmd::Load(path) => {

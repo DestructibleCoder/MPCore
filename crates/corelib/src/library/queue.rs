@@ -182,6 +182,10 @@ impl Queue {
         self.get_track(current)
     }
 
+    pub fn len(&self) -> usize {
+        self.tracks.len()
+    }
+
     pub fn current(&self) -> Option<usize> {
         self.current
     }

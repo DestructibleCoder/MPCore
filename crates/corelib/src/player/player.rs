@@ -32,6 +32,10 @@ impl Player {
         })
     }
 
+    pub fn volume(&self) -> f32 {
+        self.engine.volume()
+    }
+
     pub fn seek(&mut self, seconds: u64) -> Result<()> {
         self.engine.seek(Duration::from_secs(seconds))?;
 
@@ -79,6 +83,8 @@ impl Player {
             return Ok(());
         }
 
+        let vol = self.engine.volume();
+
         let curr = self
             .queue
             .current()
@@ -86,10 +92,21 @@ impl Player {
         let track = &self.queue.tracks()[curr];
 
         self.engine.play_track(&track)?;
+        self.engine.set_volume(vol);
 
         self.state = PlaybackState::Playing;
 
         Ok(())
+    }
+
+    pub fn play_by_index(&mut self, idx: Option<usize>) -> Result<()> {
+        anyhow::ensure!(
+            idx.is_some() && idx.unwrap() < self.queue.len(),
+            "Incorrect index!"
+        );
+
+        self.queue.set_current(idx.unwrap());
+        self.play_current()
     }
 
     pub fn current_track_name(&self) -> Option<String> {
@@ -98,7 +115,11 @@ impl Player {
 
         if let Some(title) = &track.metadata.title {
             if let Some(artist) = &track.metadata.artist {
-                return Some(format!("{} - {}", artist, title));
+                if let Some(album) = &track.metadata.album {
+                    return Some(format!("{} - {} \t | {}", artist, title, album));
+                } else {
+                    return Some(format!("{} - {}", artist, title));
+                }
             }
 
             return Some(title.clone());

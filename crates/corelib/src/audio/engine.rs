@@ -27,6 +27,10 @@ impl AudioEngine {
         self.backend.pause();
     }
 
+    pub fn volume(&self) -> f32 {
+        self.backend.volume()
+    }
+
     pub fn play(&self) {
         self.backend.play();
     }

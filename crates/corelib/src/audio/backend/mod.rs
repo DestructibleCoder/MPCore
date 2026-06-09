@@ -20,6 +20,8 @@ pub trait AudioBackend: Send {
 
     fn set_volume(&self, volume: f32);
 
+    fn volume(&self) -> f32;
+
     fn is_paused(&self) -> bool;
 
     fn reset_sink(&self);

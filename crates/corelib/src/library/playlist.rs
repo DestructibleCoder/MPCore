@@ -30,13 +30,21 @@ impl Playlist {
     pub fn save(&self, path: &Path) -> Result<()> {
         let json = serde_json::to_string_pretty(self)?;
 
-        fs::write(ensure_json_extension(path), json)?;
+        let home = dirs::home_dir().ok_or_else(|| anyhow::anyhow!("Can't detect home dir!"))?;
+
+        let full_path = home.join(path);
+
+        fs::write(ensure_json_extension(&full_path), json)?;
 
         Ok(())
     }
 
     pub fn load(path: &Path) -> Result<Self> {
-        let file = File::open(ensure_json_extension(path))?;
+        let home = dirs::home_dir().ok_or_else(|| anyhow::anyhow!("Can't detect home dir!"))?;
+
+        let full_path = home.join(path);
+
+        let file = File::open(ensure_json_extension(&full_path))?;
 
         let playlist = serde_json::from_reader(file)?;
 

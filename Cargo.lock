@@ -228,6 +228,7 @@ name = "corelib"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "dirs",
  "lofty",
  "rand",
  "rodio",

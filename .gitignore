@@ -1,3 +1,4 @@
 /target
 Cargo.lock
 features_before_release
+.mpcore_history

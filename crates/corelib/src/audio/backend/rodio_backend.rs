@@ -60,6 +60,10 @@ impl AudioBackend for RodioBackend {
         self.sink.set_volume(volume);
     }
 
+    fn volume(&self) -> f32 {
+        self.sink.volume()
+    }
+
     fn is_paused(&self) -> bool {
         self.sink.is_paused()
     }

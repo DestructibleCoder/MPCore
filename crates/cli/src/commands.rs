@@ -9,8 +9,9 @@ pub enum Command {
     Next,
     Prev,
     List,
+    Name,
     Seek(u64),
-    Volume(f32),
+    Volume(Option<f32>),
     Playlist(PlaylistCmd),
     Exit,
 }
@@ -44,10 +45,11 @@ impl Command {
                 let secs = parts.get(1).and_then(|s| s.parse().ok()).unwrap_or(0);
                 Some(Command::Seek(secs))
             }
+            "name" => Some(Command::Name),
             "prev" => Some(Command::Prev),
             "list" => Some(Command::List),
             "vol" => {
-                let vol = parts.get(1).and_then(|s| s.parse().ok()).unwrap_or(1.0);
+                let vol = parts.get(1).and_then(|s| s.parse().ok());
                 Some(Command::Volume(vol))
             }
             "exit" | "quit" => Some(Command::Exit),
