@@ -7,6 +7,7 @@ use crate::audio::{AudioEngine, RodioBackend, SymphoniaDecoder};
 use crate::player::{PlaybackState, RepeatMode};
 use crate::playlist::Playlist;
 use crate::queue::Queue;
+use crate::track::Track;
 
 pub struct Player {
     queue: Queue,
@@ -44,10 +45,6 @@ impl Player {
 
     pub fn save_playlist(&self, path: &Path) -> Result<()> {
         self.queue.save_playlist(path)
-    }
-
-    pub fn shuffle_around(&mut self) {
-        self.queue.shuffle_around();
     }
 
     pub fn load_playlist(&mut self, path: &Path) -> Result<()> {
@@ -99,19 +96,33 @@ impl Player {
         Ok(())
     }
 
+    pub fn get_tracks_in_order(&self) -> Vec<Track> {
+        let tracks = self.queue.tracks();
+        let order = self.queue.order();
+
+        let mut ret: Vec<Track> = Vec::new();
+
+        for &idx in order.into_iter() {
+            ret.push(tracks[idx].clone());
+        }
+
+        ret
+    }
+
     pub fn play_by_index(&mut self, idx: Option<usize>) -> Result<()> {
         anyhow::ensure!(
             idx.is_some() && idx.unwrap() < self.queue.len(),
             "Incorrect index!"
         );
 
-        self.queue.set_current(idx.unwrap());
+        let real_idx = self.queue.order().get(idx.unwrap()).unwrap();
+
+        self.queue.set_current(*real_idx);
         self.play_current()
     }
 
     pub fn current_track_name(&self) -> Option<String> {
-        let curr = self.queue.current()?;
-        let track = self.queue.get_track(curr)?;
+        let track = self.queue.current_track()?;
 
         if let Some(title) = &track.metadata.title {
             if let Some(artist) = &track.metadata.artist {

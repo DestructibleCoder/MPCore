@@ -10,6 +10,8 @@ pub enum Command {
     Prev,
     List,
     Name,
+    Shuffle,
+    Unshuffle,
     Seek(u64),
     Volume(Option<f32>),
     Playlist(PlaylistCmd),
@@ -45,6 +47,8 @@ impl Command {
                 let secs = parts.get(1).and_then(|s| s.parse().ok()).unwrap_or(0);
                 Some(Command::Seek(secs))
             }
+            "shuffle" => Some(Command::Shuffle),
+            "unshuffle" => Some(Command::Unshuffle),
             "name" => Some(Command::Name),
             "prev" => Some(Command::Prev),
             "list" => Some(Command::List),

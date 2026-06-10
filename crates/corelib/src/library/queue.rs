@@ -103,28 +103,8 @@ impl Queue {
     }
 
     pub fn unshuffle(&mut self) {
-        self.order = (0..self.tracks.len()).collect();
-    }
-
-    pub fn shuffle_around(&mut self) {
-        let Some(current) = self.current else {
-            return;
-        };
-
-        if self.order.len() <= 1 {
-            return;
-        }
-
-        let current_track = self.order[current];
-
-        self.order.remove(current);
-
-        let mut rng = rand::rng();
-        self.order.shuffle(&mut rng);
-
-        self.order.insert(0, current_track);
-
-        self.current = Some(0);
+        // WARN: FUNCTION IN BUGFIX
+        // self.order = (0..self.tracks.len()).collect();
     }
 
     pub fn previous_track(&mut self) {
@@ -147,6 +127,10 @@ impl Queue {
         if index < self.order.len() {
             self.current = Some(index);
         }
+    }
+
+    pub fn order(&self) -> &Vec<usize> {
+        &self.order
     }
 
     pub fn load_track_from_path(&mut self, path: std::path::PathBuf) -> Result<()> {

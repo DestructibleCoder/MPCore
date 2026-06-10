@@ -21,7 +21,7 @@ fn cmd_name(player: &Arc<Mutex<Player>>) -> Result<()> {
 
 fn cmd_list(player: &Arc<Mutex<Player>>) -> Result<()> {
     let p = player.lock().unwrap();
-    let tracks = p.queue().tracks();
+    let tracks = p.get_tracks_in_order();
 
     if tracks.is_empty() {
         println!("Playback queue is empty!");
@@ -78,6 +78,14 @@ pub fn execute_command(cmd: Command, player: &Arc<Mutex<Player>>) -> Result<bool
         Command::Volume(Some(vol)) => player.lock().unwrap().set_volume(vol),
 
         Command::Name => cmd_name(player)?,
+
+        Command::Shuffle => {
+            player.lock().unwrap().shuffle();
+        }
+
+        Command::Unshuffle => {
+            player.lock().unwrap().unshuffle();
+        }
 
         Command::Playlist(sub_cmd) => match sub_cmd {
             PlaylistCmd::Load(path) => {
